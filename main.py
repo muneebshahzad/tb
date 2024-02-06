@@ -1362,5 +1362,38 @@ def logout():
 
 #logout
 
+
+@app.route('/get-access-token', methods=['POST'])
+def get_access_token():
+    # Define your Daraz API credentials
+    app_key = '501554'
+    app_secret = 'nrP3XFN7ChZL53cXyVED1yj4iGZZtlcD'
+    callback_url = 'https://muneebshahzad.github.io'  # Your callback URL
+
+    # Extract authorization code from request data
+    authorization_code = request.json.get('authorization_code')
+
+    # Request access token using the authorization code
+    token_endpoint = 'https://api.daraz.pk/auth/token/create'
+    token_request_payload = {
+        'grant_type': 'authorization_code',
+        'code': authorization_code,
+        'redirect_uri': callback_url,
+        'client_id': app_key,
+        'client_secret': app_secret
+    }
+
+    response = requests.post(token_endpoint, data=token_request_payload)
+
+    if response.status_code == 200:
+        access_token = response.json().get('access_token')
+        if access_token:
+            return jsonify({'access_token': access_token}), 200
+        else:
+            return jsonify({'error': 'Access token not found in response'}), 500
+    else:
+        return jsonify({'error': 'Failed to retrieve access token', 'response': response.text}), response.status_code
+
+
 if __name__ == '__main__':
     app.run(debug=True)
